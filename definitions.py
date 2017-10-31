@@ -111,21 +111,21 @@ def r8_inverse(position, angle):
 	oldangle = 0
 	return (oldpos, oldangle)
 
-def r1_jacobian():
+def r1_jacobian(position, angle):
 	return 1
-def r2_jacobian():
+def r2_jacobian(position, angle):
 	return 1
-def r3_jacobian():
+def r3_jacobian(position, angle):
 	return 1 # return 1 is actually correct here
-def r4_jacobian():
+def r4_jacobian(position, angle):
 	return 1 # here too. Also, might be true for all non-circle cases
-def r5_jacobian():
+def r5_jacobian(position, angle):
 	return 1
-def r6_jacobian():
+def r6_jacobian(position, angle):
 	return 1
-def r7_jacobian():
+def r7_jacobian(position, angle):
 	return 1
-def r8_jacobian():
+def r8_jacobian(position, angle):
 	return 1
 
 # Following dictionaries should be a better format for fast lookup:

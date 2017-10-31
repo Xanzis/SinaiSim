@@ -18,7 +18,7 @@ r8 Hits circle, goes opposite
 See definitons.py to view and edit the function boundaries, updates, etc.
 """
 
-scale = 1000
+scale = 100
 
 case_lookup = np.zeros(shape=(scale, scale), dtype=np.int)
 
@@ -29,8 +29,11 @@ for pos in range(scale):
 	for ang in range(scale):
 		for i in range(1, len(minmaxes) + 1):
 			mnmx = minmaxes[i](2 * pos/float(scale) - 1)
-			if mnmx[0] < np.pi * ang/float(scale) - np.pi/2 < mnmx[1]:
+			if mnmx[0] <= np.pi * ang/float(scale) - np.pi/2 <= mnmx[1]:
+				#print "nifty"
 				case_lookup[pos, ang] = i
+
+print case_lookup
 
 def rho(pos, ang):
 	return 1
@@ -43,8 +46,9 @@ new_dist = np.zeros(shape=(scale, scale))
 for pos in range(scale):
 	for ang in range(scale):
 		casenum = case_lookup[pos, ang]
-		loc = (2 * pos/float(scale) - 1, np.pi * ang/float(scale) - (np.pi/2)
-		inverses = inverses[casenum](loc[0], loc[1])
-		new_dist[pos, ang] = rho(inverses) / abs(jacobian[casenum](loc[0], loc[1]))
+		loc = (2 * pos/float(scale) - 1, np.pi * ang/float(scale) - (np.pi/2))
+		if casenum:
+			invrs = inverses[casenum](*loc)
+			new_dist[pos, ang] = rho(*invrs) / abs(jacobians[casenum](*loc))
 
 # That should do it. probably best to represent this with pyplot

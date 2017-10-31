@@ -1,6 +1,7 @@
 import numpy as np 
 import time
 from definitions import *
+from matplotlib import pyplot
 # This imports all globals and functions from definitions. I jsut did this to save space 
 
 """
@@ -27,6 +28,23 @@ case_lookup = np.zeros(shape=(scale, scale), dtype=np.int)
 for pos in range(scale):
 	for ang in range(scale):
 		for i in range(1, len(minmaxes) + 1):
-			mnmx = minmaxes[i](pos/float(scale) - (np.pi / 2))
-			if mnmx[0] < ang/float(scale) - 1 < mnmx[1]:
+			mnmx = minmaxes[i](2 * pos/float(scale) - 1)
+			if mnmx[0] < np.pi * ang/float(scale) - np.pi/2 < mnmx[1]:
 				case_lookup[pos, ang] = i
+
+def rho(pos, ang):
+	return 1
+
+start_dist = np.array([[rho(2 * x/float(scale) - 1, np.pi * y/float(scale) - (np.pi / 2)) for x in range(scale)] for y in range(scale)])
+# starting distribution
+
+new_dist = np.zeros(shape=(scale, scale))
+
+for pos in range(scale):
+	for ang in range(scale):
+		casenum = case_lookup[pos, ang]
+		loc = (2 * pos/float(scale) - 1, np.pi * ang/float(scale) - (np.pi/2)
+		inverses = inverses[casenum](loc[0], loc[1])
+		new_dist[pos, ang] = rho(inverses) / abs(jacobian[casenum](loc[0], loc[1]))
+
+# That should do it. probably best to represent this with pyplot

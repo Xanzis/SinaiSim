@@ -1,5 +1,12 @@
 import numpy as np 
 
+def arccot(a): # This exists so I can have a continuous arccot for my boundaries
+	if a == 0:
+		return np.pi / 2
+	if a < 0:
+		return np.arctan(1/a) + np.pi
+	return np.arctan(1/a)
+
 """
 Case definition:
 r1 Hits right without hitting circle
@@ -21,17 +28,12 @@ def r2_minmax_angle(position):
 	mx = 0
 	return (mn, mx)
 def r3_minmax_angle(position):
-	mn = -1 * np.arctan((1 + position)/2)
-	if position == 0:
-		mx = - np.arcsin(0.33 / np.sqrt((1 + position) ** 2))
-	elif position < 0:
-		mx = np.pi/2 - np.arctan(1 / - position) - np.arcsin(0.33 / np.sqrt((1 + position) ** 2))
-	else:
-		mx = - np.pi/2 - np.arctan(1 / - position) - np.arcsin(0.33 / np.sqrt((1 + position) ** 2))
+	mn = - np.arctan((1 + position)/2)
+	mx = (np.pi / 2) - arccot(-position) - np.arcsin(0.33 / np.sqrt(1 + position**2))
 	return (mn, mx)
 def r4_minmax_angle(position):
-	mn = 0
-	mx = 0
+	mn = np.arcsin(0.33 / np.sqrt(1 + position**2)) + arccot(position) - np.pi / 2
+	mx = np.arctan((1 - position) / 2)
 	return (mn, mx)
 def r5_minmax_angle(position):
 	mn = 0
@@ -59,12 +61,12 @@ def r2_update(position, angle):
 	theta = 0
 	return (newpos, newtheta)
 def r3_update(position, angle):
-	newpos = 0
-	theta = 0
+	newpos = - 2 * np.tan(angle) - position
+	theta = - angle
 	return (newpos, newtheta)
 def r4_update(position, angle):
-	newpos = 0
-	theta = 0
+	newpos = - 2 * np.tan(angle) - position
+	theta = - angle
 	return (newpos, newtheta)
 def r5_update(position, angle):
 	newpos = 0

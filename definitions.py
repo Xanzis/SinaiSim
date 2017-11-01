@@ -21,8 +21,13 @@ def r2_minmax_angle(position):
 	mx = 0
 	return (mn, mx)
 def r3_minmax_angle(position):
-	mn = 0
-	mx = 0
+	mn = -1 * np.arctan((1 + position)/2)
+	if position == 0:
+		mx = - np.arcsin(0.33 / np.sqrt((1 + position) ** 2))
+	elif position < 0:
+		mx = np.pi/2 - np.arctan(1 / - position) - np.arcsin(0.33 / np.sqrt((1 + position) ** 2))
+	else:
+		mx = - np.pi/2 - np.arctan(1 / - position) - np.arcsin(0.33 / np.sqrt((1 + position) ** 2))
 	return (mn, mx)
 def r4_minmax_angle(position):
 	mn = 0

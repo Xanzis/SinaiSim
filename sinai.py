@@ -1,7 +1,7 @@
 import numpy as np 
 import time
 from definitions import *
-from matplotlib import pyplot
+from matplotlib import pyplot as plt
 # This imports all globals and functions from definitions. I jsut did this to save space 
 
 """
@@ -52,3 +52,18 @@ for pos in range(scale):
 			new_dist[pos, ang] = rho(*invrs) / abs(jacobians[casenum](*loc))
 
 # That should do it. probably best to represent this with pyplot
+
+fig = plt.figure(figsize=(6, 3))
+
+ax = fig.add_subplot(111)
+ax.set_title('colorMap')
+plt.imshow(case_lookup)
+ax.set_aspect('equal')
+
+cax = fig.add_axes([0.12, 0.1, 0.78, 0.8])
+cax.get_xaxis().set_visible(False)
+cax.get_yaxis().set_visible(False)
+cax.patch.set_alpha(0)
+cax.set_frame_on(False)
+plt.colorbar(orientation='vertical')
+plt.show()

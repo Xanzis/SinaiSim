@@ -96,12 +96,12 @@ def r2_inverse(position, angle):
 	oldangle = 0
 	return (oldpos, oldangle)
 def r3_inverse(position, angle):
-	oldpos = 0
-	oldangle = 0
+	oldpos = - position - 2 * np.tan(- angle)
+	oldangle = - angle
 	return (oldpos, oldangle)
 def r4_inverse(position, angle):
-	oldpos = 0
-	oldangle = 0
+	oldpos = - position - 2 * np.tan(- angle)
+	oldangle = - angle
 	return (oldpos, oldangle)
 def r5_inverse(position, angle):
 	oldpos = 0

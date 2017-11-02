@@ -28,6 +28,7 @@ def loc_from_ang(ang):
 	return np.pi * ang/float(scale) - np.pi/2
 
 case_lookup = np.zeros(shape=(scale, scale), dtype=np.int)
+case_lookup.fill(None)
 
 # case_lookup is a lookup table for which case a value is in.
 # 'x' axis is position and 'y' axis is angle
@@ -66,7 +67,7 @@ class Distribution(rho):
 			for ang in range(scale):
 				casenum = case_lookup[pos, ang]
 				loc = (loc_from_pos(pos), loc_from_ang(ang))
-				if casenum: #why is this if statement here also casenum isn't boolean??
+				if casenum != None: #why is this if statement here also casenum isn't boolean??
 					invrs = inverses[casenum](*loc) #what does this star thing do?
 					new_distribution[pos, ang] = self.rho(*invrs) / abs(jacobians[casenum](*loc)) #what's obians?
 

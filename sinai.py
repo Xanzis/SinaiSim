@@ -1,8 +1,8 @@
-import numpy as np 
+import numpy as np
 import time
 from definitions import *
 from matplotlib import pyplot as plt
-# This imports all globals and functions from definitions. I jsut did this to save space 
+# This imports all globals and functions from definitions. I jsut did this to save space
 
 """
 Case definition:
@@ -13,12 +13,19 @@ r4 Hits opposite without hitting circle, passing circle on right
 r5 Hits circle, comes back
 r6 Hits circle, goes right
 r7 Hits circle, goes left
-r8 Hits circle, goes opposite
+r8 Hits circle, goes opposite --> shouldn't this be split into hitting on
+either side?
 
 See definitons.py to view and edit the function boundaries, updates, etc.
 """
 
 scale = 100
+
+def loc_from_pos(pos):
+	return 2 * pos/float(scale) - 1
+
+def loc_from_ang(ang):
+	return np.pi * ang/float(scale) - np.pi/2
 
 case_lookup = np.zeros(shape=(scale, scale), dtype=np.int)
 
@@ -27,29 +34,45 @@ case_lookup = np.zeros(shape=(scale, scale), dtype=np.int)
 
 for pos in range(scale):
 	for ang in range(scale):
-		for i in range(1, len(minmaxes) + 1):
-			mnmx = minmaxes[i](2 * pos/float(scale) - 1)
-			if mnmx[0] <= np.pi * ang/float(scale) - np.pi/2 <= mnmx[1]:
+		for i in range(len(minmaxes)): #i shifted keys in dictionary to make this nicer. maybe we should shift names of regions too?
+			mnmx = minmaxes[i](loc_from_pos(pos))
+			if mnmx[0] <= loc_from_ang(ang) <= mnmx[1]:
 				#print "nifty"
 				case_lookup[pos, ang] = i
+				break
 
 print case_lookup
 
 def rho(pos, ang):
 	return 1
 
-start_dist = np.array([[rho(2 * x/float(scale) - 1, np.pi * y/float(scale) - (np.pi / 2)) for x in range(scale)] for y in range(scale)])
-# starting distribution
+class Distribution(rho):
 
-new_dist = np.zeros(shape=(scale, scale))
+	def __init__(self, rho, current_state, steps_from_start):
+		self.rho = rho
+		self.steps_from_start = 0
+		self.current_state = np.array([[rho(loc_from_pos(x), loc_from_ang(y)) for x in range(scale)] for y in range(scale)])
+		# ^^ start distribution
 
-for pos in range(scale):
-	for ang in range(scale):
-		casenum = case_lookup[pos, ang]
-		loc = (2 * pos/float(scale) - 1, np.pi * ang/float(scale) - (np.pi/2))
-		if casenum:
-			invrs = inverses[casenum](*loc)
-			new_dist[pos, ang] = rho(*invrs) / abs(jacobians[casenum](*loc))
+	def update(self):
+		"""okay so i just copied in your code here but i noticed that iterations
+		of the distribution don't depend on the past state of the distribution
+		which seems wrong? --> I think we need to match inverse points to the nearest
+		point in the distribution, but I don't know if that'll preserve the one to one
+		quality (almost definitely won't)"""
+		new_distribution = np.zeros(shape=(scale, scale))
+
+		for pos in range(scale):
+			for ang in range(scale):
+				casenum = case_lookup[pos, ang]
+				loc = (loc_from_pos(pos), loc_from_ang(ang))
+				if casenum: #why is this if statement here also casenum isn't boolean??
+					invrs = inverses[casenum](*loc) #what does this star thing do?
+					new_distribution[pos, ang] = self.rho(*invrs) / abs(obians[casenum](*loc)) #what's obians?
+
+		self.steps_from_start += 1
+		self.current_state = new_distribution
+
 
 # That should do it. probably best to represent this with pyplot
 

@@ -27,8 +27,20 @@ def loc_from_pos(pos):
 def loc_from_ang(ang):
 	return np.pi * ang/float(scale) - np.pi/2
 
-case_lookup = np.zeros(shape=(scale, scale), dtype=np.int)
-case_lookup.fill(None)
+def pos_from_loc(loc):
+	pos = int((scale/2.0)*(loc + 1)) # let's try this for now
+	if -1 <= pos <= 1:
+		return pos
+	raise ValueError("Index out of bounds on call of pos_from_loc")
+
+def ang_from_loc(loc):
+	ang = int((scale/np.pi)*(loc + np.pi/2)) # let's try this for now
+	if -1 <= pos <= 1:
+		return ang
+	raise ValueError("Index out of bounds on call of pos_from_loc")
+
+
+case_lookup = np.empty(shape=(scale, scale), dtype=np.int)
 
 # case_lookup is a lookup table for which case a value is in.
 # 'x' axis is position and 'y' axis is angle
@@ -47,7 +59,7 @@ print case_lookup
 def rho(pos, ang):
 	return 1
 
-class Distribution(rho):
+class Distribution():
 
 	def __init__(self, rho, current_state, steps_from_start):
 		self.rho = rho
@@ -68,9 +80,10 @@ class Distribution(rho):
 				casenum = case_lookup[pos, ang]
 				loc = (loc_from_pos(pos), loc_from_ang(ang))
 				if casenum != None: #why is this if statement here also casenum isn't boolean??
-					invrs = inverses[casenum](*loc) #what does this star thing do?
-					new_distribution[pos, ang] = self.rho(*invrs) / abs(jacobians[casenum](*loc)) #what's obians?
-
+					invrs = inverses[casenum](*loc)
+					new_distribution[pos, ang] = self.current_state[ang_from_loc(invrs[1], invrs[0])] / abs(jacobians[casenum](*loc))
+					# check order of invrs[1] and 0 in the reference to current state. Right now we think current state
+					# should be indexed by currentstate[angle, position]. Should be easy enough to check on.
 		self.steps_from_start += 1
 		self.current_state = new_distribution
 

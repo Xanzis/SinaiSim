@@ -41,6 +41,7 @@ def ang_from_loc(loc):
 
 
 case_lookup = np.empty(shape=(scale, scale), dtype=np.int)
+case_lookup.fill(5)
 
 # case_lookup is a lookup table for which case a value is in.
 # 'x' axis is position and 'y' axis is angle

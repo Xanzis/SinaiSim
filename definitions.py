@@ -20,12 +20,12 @@ r8 Hits circle, goes opposite
 """
 
 def r1_minmax_angle(position):
-	mn = 0
-	mx = 0
+	mn = max(np.arcsin(0.333 / np.sqrt(1 + position **2)) + arccot(position) - np.pi / 2, np.arctan((1 - position) / 2))
+	mx = np.pi / 2
 	return (mn, mx)
 def r2_minmax_angle(position):
-	mn = 0
-	mx = 0
+	mn = - np.pi / 2
+	mx = min( - np.arctan(position) - np.arcsin(0.333 / np.sqrt(1 + position**2)), - np.arctan((1 + position) / 2))
 	return (mn, mx)
 def r3_minmax_angle(position):
 	mn = - np.arctan((1 + position)/2)

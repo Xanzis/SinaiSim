@@ -68,7 +68,7 @@ class Distribution(rho):
 				loc = (loc_from_pos(pos), loc_from_ang(ang))
 				if casenum: #why is this if statement here also casenum isn't boolean??
 					invrs = inverses[casenum](*loc) #what does this star thing do?
-					new_distribution[pos, ang] = self.rho(*invrs) / abs(obians[casenum](*loc)) #what's obians?
+					new_distribution[pos, ang] = self.rho(*invrs) / abs(jacobians[casenum](*loc)) #what's obians?
 
 		self.steps_from_start += 1
 		self.current_state = new_distribution

@@ -16,7 +16,8 @@ r4 Hits opposite without hitting circle, passing circle on right
 r5 Hits circle, comes back
 r6 Hits circle, goes right
 r7 Hits circle, goes left
-r8 Hits circle, goes opposite
+r8 Hits circle, goes opposite (on right side)
+r9 Hits circle, goes opposite (on left side)
 """
 
 def r1_minmax_angle(position):
@@ -48,6 +49,10 @@ def r7_minmax_angle(position):
 	mx = 0
 	return (mn, mx)
 def r8_minmax_angle(position):
+	mn = 0
+	mx = 0
+	return (mn, mx)
+def r9_minmax_angle(position):
 	mn = 0
 	mx = 0
 	return (mn, mx)
@@ -86,6 +91,10 @@ def r8_update(position, angle):
 	newpos = 0
 	new_angle = 0
 	return (newpos, new_angle)
+def r9_update(position, angle):
+	newpos = 0
+	new_angle = 0
+	return (newpos, new_angle)
 
 def r1_inverse(position, angle):
 	oldpos = 0
@@ -119,6 +128,10 @@ def r8_inverse(position, angle):
 	oldpos = 0
 	oldangle = 0
 	return (oldpos, oldangle)
+def r9_inverse(position, angle):
+	oldpos = 0
+	oldangle = 0
+	return (oldpos, oldangle)
 
 def r1_jacobian(position, angle):
 	return 1
@@ -136,6 +149,8 @@ def r7_jacobian(position, angle):
 	return 1
 def r8_jacobian(position, angle):
 	return 1
+def r9_jacobian(position, angle):
+	return 1
 
 # Following dictionaries should be a better format for fast lookup:
 minmaxes = {
@@ -146,7 +161,8 @@ minmaxes = {
 	4: r5_minmax_angle,
 	5: r6_minmax_angle,
 	6: r7_minmax_angle,
-	7: r8_minmax_angle
+	7: r8_minmax_angle,
+	8: r9_minmax_angle
 }
 updates = {
 	0: r1_update,
@@ -156,7 +172,8 @@ updates = {
 	4: r5_update,
 	5: r6_update,
 	6: r7_update,
-	7: r8_update
+	7: r8_update,
+	8: r9_update
 }
 inverses = {
 	0: r1_inverse,
@@ -167,6 +184,7 @@ inverses = {
 	5: r6_inverse,
 	6: r7_inverse,
 	7: r8_inverse,
+	8: r9_inverse
 }
 
 jacobians = {
@@ -178,4 +196,5 @@ jacobians = {
 	5: r6_jacobian,
 	6: r7_jacobian,
 	7: r8_jacobian,
+	8: r9_jacobian
 }

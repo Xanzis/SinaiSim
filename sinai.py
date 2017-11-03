@@ -62,10 +62,16 @@ def rho(pos, ang):
 
 class Distribution():
 
-	def __init__(self, rho, current_state, steps_from_start):
+	def __init__(self, rho, current_state=None, steps_from_start=None):
 		self.rho = rho
-		self.steps_from_start = 0
-		self.current_state = np.array([[rho(loc_from_pos(x), loc_from_ang(y)) for x in range(scale)] for y in range(scale)])
+		if not steps_from_start:
+			self.steps_from_start = 0
+		else:
+			self.steps_from_start = steps_from_start
+		if not current_state:
+			self.current_state = np.array([[rho(loc_from_pos(x), loc_from_ang(y)) for x in range(scale)] for y in range(scale)])
+		else:
+			self.current_state = current_state
 		# ^^ start distribution
 
 	def update(self):
@@ -88,6 +94,7 @@ class Distribution():
 		self.steps_from_start += 1
 		self.current_state = new_distribution
 
+dist = Distribution(rho, )
 
 # That should do it. probably best to represent this with pyplot
 
@@ -105,3 +112,4 @@ cax.patch.set_alpha(0)
 cax.set_frame_on(False)
 plt.colorbar(orientation='vertical')
 plt.show()
+

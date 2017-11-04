@@ -37,24 +37,41 @@ def r4_minmax_angle(position):
 	mx = np.arctan((1 - position) / 2)
 	return (mn, mx)
 def r5_minmax_angle(position):
-	mn = 0
-	mx = 0
+	a = position
+	thingy1 = (a - 1j) - np.roots([a * (81 + 81j) - 81 + 81j,  -9 -18j - 9 * a, 0, a + 1 - 2j, 1 + 1j - a * (1 - 1j)])[3]
+	thingy2 = (a - 1j) - np.roots([a * (81 + 81j) - 81 + 81j, (-18 - 9j) + 9j * a, 0, (-2 + 1j) - 1j * a, (-1 -1j) + a * (1 - 1j)])[3]
+	mn = - np.pi / 2 - np.arctan2(thingy2.imag, thingy2.real)
+	mx = - np.pi / 2 - np.arctan2(thingy1.imag, thingy1.real)
 	return (mn, mx)
 def r6_minmax_angle(position):
-	mn = 0
-	mx = 0
+	mx, mn = r7_minmax_angle(-position)
+	mn *= -1
+	mx *= -1
 	return (mn, mx)
 def r7_minmax_angle(position):
-	mn = 0
-	mx = 0
+	a = position
+	thingy2 = (a - 1j) - np.roots([a * (81 + 81j) - 81 + 81j, (-18 - 9j) + 9j * a, 0, (-2 + 1j) - 1j * a, (-1 -1j) + a * (1 - 1j)])[3]
+	mx = - np.pi / 2 - np.arctan2(thingy2.imag, thingy2.real)
+	if np.arctan((a + 1)/2) > np.pi/4 - np.arcsin(1 / (3 * np.sqrt(2))):
+		mn = - np.pi / 2 - np.arctan(1 / -a) - np.arcsin(1 / (3 * np.sqrt(1 + a**2)))
+	else:
+		mnthing = (a - 1j) - np.roots([(81 + 81j) * a - 81 + 81j, 9 * a - 9, 0, 1 - a, 1 + 1j - a * (1 - 1j)])[3]
+		mn = -np.pi / 2 - np.arctan2(mnthing.imag, mnthing.real)
+	#mn = max()
+	#mn = -4
+	#mx = 4
 	return (mn, mx)
 def r8_minmax_angle(position):
-	mn = 0
-	mx = 0
+	a = position
+	thingy2 = (a - 1j) - np.roots([a * (81 + 81j) - 81 + 81j, (-18 - 9j) + 9j * a, 0, (-2 + 1j) - 1j * a, (-1 -1j) + a * (1 - 1j)])[3]
+	mn = - np.pi / 2 - np.arctan2(thingy2.imag, thingy2.real)
+	mx = 2
+	# bit of a hack here. relies on the fact that other regions override, and on the fact that I'm lazy
 	return (mn, mx)
 def r9_minmax_angle(position):
-	mn = 0
-	mx = 0
+	mx, mn = r8_minmax_angle(-position)
+	mn *= -1
+	mx *= -1
 	return (mn, mx)
 
 def r1_update(position, angle):

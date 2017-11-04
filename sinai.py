@@ -19,13 +19,13 @@ either side?
 See definitons.py to view and edit the function boundaries, updates, etc.
 """
 
-scale = 100
+scale = 200
 
-def showfig(to_show):
+def showfig(to_show, name='colorMap'):
 	fig = plt.figure(figsize=(6, 3))
 
 	ax = fig.add_subplot(111)
-	ax.set_title('colorMap')
+	ax.set_title(name)
 	plt.imshow(to_show)
 	ax.set_aspect('equal')
 
@@ -63,10 +63,12 @@ def ang_from_loc(loc):
 
 
 case_lookup = np.empty(shape=(scale, scale), dtype=np.int)
-case_lookup.fill(5)
+case_lookup.fill(-1)
 
 # case_lookup is a lookup table for which case a value is in.
 # 'x' axis is position and 'y' axis is angle
+
+
 
 for pos in range(scale):
 	for ang in range(scale):
@@ -78,6 +80,7 @@ for pos in range(scale):
 				break
 
 print case_lookup
+print 7 in case_lookup
 
 def rho(pos, ang):
 	return pos * ang
@@ -125,6 +128,12 @@ dist = Distribution(rho)
 # That should do it. probably best to represent this with pyplot
 
 showfig(case_lookup)
+"""
+for i in range(len(minmaxes)):
+	fig_rules = 5 * (case_lookup == i)
+	showfig(fig_rules, name=str(i)+"boundaries")
+"""
+
 showfig(dist.current_state)
 dist.update()
 showfig(dist.current_state)

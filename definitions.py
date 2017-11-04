@@ -75,14 +75,12 @@ def r9_minmax_angle(position):
 	return (mn, mx)
 
 def r1_update(position, angle):
-	newpos = 0
-	new_angle = 0
-	return (newpos, new_angle) #we don't have to call it new_angle but before
-								# you had theta and then newtheta in the return
-								# so we need to at least pick one of those two.
+	newpos = (1 - position) * np.tan(np.pi / 2 - angle) - 1
+	new_angle = - np.pi / 2 + angle
+	return (newpos, new_angle)
 def r2_update(position, angle):
-	newpos = 0
-	new_angle = 0
+	newpos = 1 - (1 + position) * np.tan(np.pi / 2 - angle)
+	new_angle = np.pi / 2 - angle
 	return (newpos, new_angle)
 def r3_update(position, angle):
 	newpos = - 2 * np.tan(angle) - position

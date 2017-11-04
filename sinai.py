@@ -83,7 +83,7 @@ print case_lookup
 print 7 in case_lookup
 
 def rho(pos, ang):
-	return pos * ang
+	return pos
 
 class Distribution():
 
@@ -100,23 +100,27 @@ class Distribution():
 		# ^^ start distribution
 
 	def update(self):
-		"""okay so i just copied in your code here but i noticed that iterations
-		of the distribution don't depend on the past state of the distribution
-		which seems wrong? --> I think we need to match inverse points to the nearest
-		point in the distribution, but I don't know if that'll preserve the one to one
-		quality (almost definitely won't)"""
 		new_distribution = np.zeros(shape=(scale, scale))
 
 		for pos in range(scale):
 			for ang in range(scale):
 				casenum = case_lookup[pos, ang]
 				loc = (loc_from_pos(pos), loc_from_ang(ang))
-				if casenum != None: #why is this if statement here also casenum isn't boolean??
-					invrs = inverses[casenum](*loc)
+				if casenum != -1:
+					invrs = updates[casenum](loc[0], - loc[1])
+					invrs = (invrs[0], -invrs[1])
+					if invrs[1] <= -3:
+						print "invrs: ", invrs
+						print "casenum: ", casenum
+						print "loc: ", loc
 					refang = ang_from_loc(invrs[1])
-					refpos = pos_from_loc(invrs[0])
+					refpos = pos_from_loc(invrs[0]) 
+					# Note: this relies on the fact that the inverse is the same as the update for negative theta.
+					# This is useful because it saves having to find out the region the thing came from to get an inverse
+					# So yeah this is fine. Also backcase is the case that the inverse is in.
 					if refang != None and refpos != None:
-						new_distribution[pos, ang] = self.current_state[refang, refpos] / abs(jacobians[casenum](*loc))
+						backcase = case_lookup[refpos, refang]
+						new_distribution[pos, ang] = self.current_state[refang, refpos] / abs(jacobians[backcase](*invrs))
 					# check order of invrs[1] and 0 in the reference to current state. Right now we think current state
 					# should be indexed by currentstate[angle, position]. Should be easy enough to check on.
 		self.steps_from_start += 1

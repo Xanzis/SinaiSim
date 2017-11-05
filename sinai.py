@@ -68,7 +68,8 @@ case_lookup.fill(-1)
 # case_lookup is a lookup table for which case a value is in.
 # 'x' axis is position and 'y' axis is angle
 
-
+print "Loading lookup table..."
+st = time.time()
 
 for pos in range(scale):
 	for ang in range(scale):
@@ -79,8 +80,11 @@ for pos in range(scale):
 				case_lookup[pos, ang] = i
 				break
 
-print case_lookup
-print 7 in case_lookup
+print "Done in", time.time() - st, "s."
+print "Running..."
+
+#print case_lookup
+#print 7 in case_lookup
 
 def rho(pos, ang):
 	return np.sin(5 * pos) + np.cos(6 * ang)

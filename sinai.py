@@ -104,12 +104,15 @@ class Distribution():
 
 		for pos in range(scale):
 			for ang in range(scale):
-				casenum = case_lookup[pos, ang]
-				loc = (loc_from_pos(pos), loc_from_ang(ang))
+				# In this situation, casenum is not the case number for the location in statespace we are calculating
+				# rho for. Instead, it is the case numebr to be used for propagating back to the previous location,
+				# namely, same position but negated angle.
+				casenum = case_lookup[pos, -ang]
+				loc = (loc_from_pos(pos), loc_from_ang(ang)) # this is still correct location. loc[1] to be negated later.
 				if casenum != -1:
 					invrs = updates[casenum](loc[0], - loc[1])
 					invrs = (invrs[0], -invrs[1])
-					if invrs[1] <= -3:
+					if not -np.pi / 2 - 0.01 < invrs[1] < np.pi / 2 + 0.01:
 						print "invrs: ", invrs
 						print "casenum: ", casenum
 						print "loc: ", loc

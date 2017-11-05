@@ -79,8 +79,13 @@ def r1_update(position, angle):
 	new_angle = - np.pi / 2 + angle
 	return (newpos, new_angle)
 def r2_update(position, angle):
-	newpos = 1 - (1 + position) * np.tan(np.pi / 2 - angle)
-	new_angle = np.pi / 2 - angle
+	#newpos = 1 - (1 + position) * np.tan(np.pi / 2 - angle)
+	#new_angle = np.pi / 2 - angle
+	position *= -1
+	angle *= -1
+	newpos, new_angle = r1_update(position, angle)
+	newpos *= -1
+	new_angle *= -1
 	return (newpos, new_angle)
 def r3_update(position, angle):
 	newpos = - 2 * np.tan(angle) - position

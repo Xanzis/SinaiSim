@@ -153,6 +153,8 @@ def r9_inverse(position, angle):
 	oldangle = 0
 	return (oldpos, oldangle)
 
+# note: by jacobian, I actually mean determinant of the jacobian
+
 def r1_jacobian(position, angle):
 	return 1
 def r2_jacobian(position, angle):

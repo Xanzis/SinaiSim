@@ -83,7 +83,7 @@ print case_lookup
 print 7 in case_lookup
 
 def rho(pos, ang):
-	return pos
+	return np.sin(5 * pos) + np.cos(6 * ang)
 
 class Distribution():
 
@@ -112,10 +112,10 @@ class Distribution():
 				if casenum != -1:
 					invrs = updates[casenum](loc[0], - loc[1])
 					invrs = (invrs[0], -invrs[1])
-					if not -np.pi / 2 - 0.01 < invrs[1] < np.pi / 2 + 0.01:
-						print "invrs: ", invrs
-						print "casenum: ", casenum
-						print "loc: ", loc
+					#if not -np.pi / 2 - 0.01 < invrs[1] < np.pi / 2 + 0.01:
+					#	print "invrs: ", invrs
+					#	print "casenum: ", casenum
+					#	print "loc: ", loc
 					refang = ang_from_loc(invrs[1])
 					refpos = pos_from_loc(invrs[0]) 
 					# Note: this relies on the fact that the inverse is the same as the update for negative theta.
@@ -140,8 +140,11 @@ for i in range(len(minmaxes)):
 	fig_rules = 5 * (case_lookup == i)
 	showfig(fig_rules, name=str(i)+"boundaries")
 """
+doupdate = 1
+showfig(dist.current_state)
 
-showfig(dist.current_state)
-dist.update()
-showfig(dist.current_state)
+while doupdate:
+	dist.update()
+	showfig(dist.current_state)
+	doupdate = input("Update again? 1/0\n")
 

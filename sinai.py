@@ -2,6 +2,7 @@ import numpy as np
 import time
 from definitions import *
 from matplotlib import pyplot as plt
+import sys
 # This imports all globals and functions from definitions. I jsut did this to save space
 
 """
@@ -68,17 +69,23 @@ case_lookup.fill(-1)
 # case_lookup is a lookup table for which case a value is in.
 # 'x' axis is position and 'y' axis is angle
 
-print "Loading lookup table..."
 st = time.time()
 
-for pos in range(scale):
-	for ang in range(scale):
-		for i in range(len(minmaxes)): #i shifted keys in dictionary to make this nicer. maybe we should shift names of regions too?
-			mnmx = minmaxes[i](loc_from_pos(pos))
-			if mnmx[0] <= loc_from_ang(ang) <= mnmx[1]:
-				#print "nifty"
-				case_lookup[pos, ang] = i
-				break
+if len(sys.argv) == 2 and sys.argv[1] == '-l':
+	print "Loading lookup table from file..."
+	case_lookup = np.load("case_lookup.sn")
+else:
+	print "Loading lookup table from scratch..."
+
+	for pos in range(scale):
+		for ang in range(scale):
+			for i in range(len(minmaxes)): #i shifted keys in dictionary to make this nicer. maybe we should shift names of regions too?
+				mnmx = minmaxes[i](loc_from_pos(pos))
+				if mnmx[0] <= loc_from_ang(ang) <= mnmx[1]:
+					#print "nifty"
+					case_lookup[pos, ang] = i
+					break
+	case_lookup.dump("case_lookup.sn")
 
 print "Done in", time.time() - st, "s."
 print "Running..."
@@ -87,6 +94,7 @@ print "Running..."
 #print 7 in case_lookup
 
 def rho(pos, ang):
+	return pos
 	return np.sin(5 * pos) + np.cos(6 * ang)
 
 class Distribution():

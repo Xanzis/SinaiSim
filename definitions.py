@@ -7,6 +7,20 @@ def arccot(a): # This exists so I can have a continuous arccot for my boundaries
 		return np.arctan(1/a) + np.pi
 	return np.arctan(1/a)
 
+def delta(position, angle):
+	r = 0.3333
+	a = position
+	t = angle
+	thingy = -1 - a **2 + 2 * r **2 
+	thingy += - (-1 + a **2)*np.cos(2 * t)
+	thingy += - 2 * a * np.sin(2 * t)
+	thingy *= 2
+	return np.sqrt(thingy)
+	"""
+	=Sqrt[2(-1 - a^2 + 2 r^2 - (-1 + a^2) Cos[2 theta] - 2 a Sin[2 theta])]
+	for use in calculating updates for the circle
+	"""
+
 """
 Case definition:
 r1 Hits right without hitting circle
@@ -96,8 +110,48 @@ def r4_update(position, angle):
 	new_angle = - angle
 	return (newpos, new_angle)
 def r5_update(position, angle):
-	newpos = 0
-	new_angle = 0
+	delta = delta(position, angle)
+	a = position
+	t = angle
+	r = 0.3333
+	num = 0
+	den = 0
+	num += a * delta
+	num += - 2 * a * (-1 + r **2) * np.cos(t)
+	num += a * delta * np.cos(2 * t)
+	num += - 2 * a * np.cos(3 * t)
+	num += 3 * np.sin(t)
+	num += a **2 * np.sin(t)
+	num += - 4 * r **2 * np.sin(t)
+	num += delta * np.sin(2 * t)
+	num += - np.sin(3 * t)
+	num += a **2 * np.sin(3 * t)
+	thing = -2 * a + a * delta * np.cos(t) - 2 * a * np.cos(2 * t) + delta * np.sin(t)
+	den += (-1 - 3 a **2 + 2 * r **2) * np.cos(t)
+	den += - (-1 + a **2) * np.cos(3 * t)
+	den += 2 * np.sin(t) * thing
+	"""
+	position = 
+	(a delta - 2 a (-1 + r^2) Cos[theta] + a delta Cos[2 theta] - 
+   2 a Cos[3 theta] + 3 Sin[theta] + a^2 Sin[theta] - 
+    4 r^2 Sin[theta] + delta Sin[2 theta] - Sin[3 theta] + 
+    a^2 Sin[3 theta])/((-1 - 3 a^2 + 2 r^2) Cos[
+      theta] - (-1 + a^2) Cos[3 theta] + 
+    2 Sin[theta] (-2 a + a delta Cos[theta] - 2 a Cos[2 theta] + 
+       delta Sin[theta]))
+	"""
+	newpos = num/den
+	atn = 0
+	atn += a + a * np.cos(2 * t)
+	atn += - delta * np.sin(t) + np.sin(2 * t)
+	atn /= 1 + delta * np.cos(t) - np.cos(2 * t) + a * np.sin(2 * t)
+	"""
+	angle =
+	theta + 2 ArcTan[(
+    a + a Cos[2 theta] - delta Sin[theta] + Sin[2 theta])/(
+    1 + delta Cos[theta] - Cos[2 theta] + a Sin[2 theta])]
+	"""
+	new_angle = t + 2 * np.arctan(atn)
 	return (newpos, new_angle)
 def r6_update(position, angle):
 	newpos = 0
@@ -164,7 +218,21 @@ def r3_jacobian(position, angle):
 def r4_jacobian(position, angle):
 	return 1 # here too. Also, might be true for all non-circle cases
 def r5_jacobian(position, angle):
-	return 1
+	delta = delta(position, angle)
+	a = position
+	t = angle
+	r = 0.3333
+	num = 2 * r **2 * np.cos(t)
+	den = 0
+	den += (3 * a **2 + 2 * r **2 - 1) * np.cos(t)
+	den += - a **2 cos(3 * t)
+	den += a * delta * np.sin(2 * t)
+	den += - 2 * a * np.sin(t)
+	den += - 2 * a * np.sin(3 * t)
+	den += - delta * np.cos(2 * t)
+	den += delta
+	den += np.cos(3 * t)
+	return num / den
 def r6_jacobian(position, angle):
 	return 1
 def r7_jacobian(position, angle):

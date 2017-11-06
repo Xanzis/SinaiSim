@@ -224,7 +224,7 @@ def r5_jacobian(position, angle):
 	r = 0.3333
 	num = 2 * r **2 * np.cos(t)
 	den = 0
-	den += (3 * a **2 + 2 * r **2 - 1) * np.cos(t)
+	den += (- 3 * a **2 + 2 * r **2 - 1) * np.cos(t)
 	den += - a **2 * np.cos(3 * t)
 	den += a * dlta * np.sin(2 * t)
 	den += - 2 * a * np.sin(t)
@@ -232,7 +232,7 @@ def r5_jacobian(position, angle):
 	den += - dlta * np.cos(2 * t)
 	den += dlta
 	den += np.cos(3 * t)
-	return num / den
+	return abs(num / den)
 def r6_jacobian(position, angle):
 	return 1
 def r7_jacobian(position, angle):

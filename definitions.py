@@ -110,24 +110,24 @@ def r4_update(position, angle):
 	new_angle = - angle
 	return (newpos, new_angle)
 def r5_update(position, angle):
-	delta = delta(position, angle)
+	dlta = delta(position, angle)
 	a = position
 	t = angle
 	r = 0.3333
 	num = 0
 	den = 0
-	num += a * delta
+	num += a * dlta
 	num += - 2 * a * (-1 + r **2) * np.cos(t)
-	num += a * delta * np.cos(2 * t)
+	num += a * dlta * np.cos(2 * t)
 	num += - 2 * a * np.cos(3 * t)
 	num += 3 * np.sin(t)
 	num += a **2 * np.sin(t)
 	num += - 4 * r **2 * np.sin(t)
-	num += delta * np.sin(2 * t)
+	num += dlta * np.sin(2 * t)
 	num += - np.sin(3 * t)
 	num += a **2 * np.sin(3 * t)
-	thing = -2 * a + a * delta * np.cos(t) - 2 * a * np.cos(2 * t) + delta * np.sin(t)
-	den += (-1 - 3 a **2 + 2 * r **2) * np.cos(t)
+	thing = -2 * a + a * dlta * np.cos(t) - 2 * a * np.cos(2 * t) + dlta * np.sin(t)
+	den += (-1 - 3 * a **2 + 2 * r **2) * np.cos(t)
 	den += - (-1 + a **2) * np.cos(3 * t)
 	den += 2 * np.sin(t) * thing
 	"""
@@ -143,8 +143,8 @@ def r5_update(position, angle):
 	newpos = num/den
 	atn = 0
 	atn += a + a * np.cos(2 * t)
-	atn += - delta * np.sin(t) + np.sin(2 * t)
-	atn /= 1 + delta * np.cos(t) - np.cos(2 * t) + a * np.sin(2 * t)
+	atn += - dlta * np.sin(t) + np.sin(2 * t)
+	atn /= 1 + dlta * np.cos(t) - np.cos(2 * t) + a * np.sin(2 * t)
 	"""
 	angle =
 	theta + 2 ArcTan[(
@@ -218,19 +218,19 @@ def r3_jacobian(position, angle):
 def r4_jacobian(position, angle):
 	return 1 # here too. Also, might be true for all non-circle cases
 def r5_jacobian(position, angle):
-	delta = delta(position, angle)
+	dlta = delta(position, angle)
 	a = position
 	t = angle
 	r = 0.3333
 	num = 2 * r **2 * np.cos(t)
 	den = 0
 	den += (3 * a **2 + 2 * r **2 - 1) * np.cos(t)
-	den += - a **2 cos(3 * t)
-	den += a * delta * np.sin(2 * t)
+	den += - a **2 * np.cos(3 * t)
+	den += a * dlta * np.sin(2 * t)
 	den += - 2 * a * np.sin(t)
 	den += - 2 * a * np.sin(3 * t)
-	den += - delta * np.cos(2 * t)
-	den += delta
+	den += - dlta * np.cos(2 * t)
+	den += dlta
 	den += np.cos(3 * t)
 	return num / den
 def r6_jacobian(position, angle):

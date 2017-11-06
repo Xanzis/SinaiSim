@@ -15,8 +15,8 @@ def delta(position, angle):
 	thingy += - (-1 + a **2)*np.cos(2 * t)
 	thingy += - 2 * a * np.sin(2 * t)
 	thingy *= 2
-	if thingy < 0:
-		print position, angle, thingy
+	#if thingy < 0:
+	#	print position, angle, thingy
 	thingy = max(0, thingy)
 	return np.sqrt(thingy)
 	"""
@@ -38,19 +38,23 @@ r9 Hits circle, goes opposite (on left side)
 """
 
 def r1_minmax_angle(position):
-	mn = max(np.arcsin(0.333 / np.sqrt(1 + position **2)) + arccot(position) - np.pi / 2, np.arctan((1 - position) / 2))
+	r = 1 / 3.0
+	mn = max(np.arcsin(r / np.sqrt(1 + position **2)) + arccot(position) - np.pi / 2, np.arctan((1 - position) / 2))
 	mx = np.pi / 2
 	return (mn, mx)
 def r2_minmax_angle(position):
+	r = 1 / 3.0
 	mn = - np.pi / 2
-	mx = min( - np.arctan(position) - np.arcsin(0.333 / np.sqrt(1 + position**2)), - np.arctan((1 + position) / 2))
+	mx = min( - np.arctan(position) - np.arcsin(r / np.sqrt(1 + position**2)), - np.arctan((1 + position) / 2))
 	return (mn, mx)
 def r3_minmax_angle(position):
+	r = 1 / 3.0
 	mn = - np.arctan((1 + position)/2)
-	mx = (np.pi / 2) - arccot(-position) - np.arcsin(0.333 / np.sqrt(1 + position**2))
+	mx = (np.pi / 2) - arccot(-position) - np.arcsin(r / np.sqrt(1 + position**2))
 	return (mn, mx)
 def r4_minmax_angle(position):
-	mn = np.arcsin(0.333 / np.sqrt(1 + position**2)) + arccot(position) - np.pi / 2
+	r = 1 / 3.0
+	mn = np.arcsin(r / np.sqrt(1 + position**2)) + arccot(position) - np.pi / 2
 	mx = np.arctan((1 - position) / 2)
 	return (mn, mx)
 def r5_minmax_angle(position):
@@ -114,12 +118,14 @@ def r4_update(position, angle):
 	return (newpos, new_angle)
 def r5_update(position, angle):
 	dlta = delta(position, angle)
+	"""
 	if dlta == 0:
 		print "r5dlta < 0"
 		return (0, 0)
+	"""
 	a = position
 	t = angle
-	r = 0.3333
+	r = 1 / 3.0
 	num = 0
 	den = 0
 	num += a * dlta
@@ -161,14 +167,16 @@ def r5_update(position, angle):
 	return (newpos, new_angle)
 def r6_update(position, angle):
 	dlta = delta(position, angle)
+	"""
 	if dlta == 0:
 		print "r6dlta < 0"
 		return (0, 0)
+	"""
 	a = position
 	t = angle
 	num = 0
 	den = 0
-	r = 0.3333
+	r = 1 / 3.0
 	num += (-1 - 3 * a **2 + 2 * a * r **2) * np.cos(t)
 	num += - (-1 + a **2) * np.cos(3 * t)
 	num += 2 * np.sin(t) * (- 2 * a + r **2 + a * dlta * np.cos(t) - 2 * a * np.cos(2 * t) + dlta * np.sin(t))
@@ -205,13 +213,27 @@ def r7_update(position, angle):
 	new_angle *= -1
 	return (newpos, new_angle)
 def r8_update(position, angle):
-	newpos = 0
-	new_angle = 0
+	a = position
+	t = angle
+	r = 1 / 3.0
+	#print "r8/9", a, t
+	dlta = delta(position, angle)
+	num = 0
+	den = 0
+	num += a * dlta + a * dlta * np.cos(2 * t) + 3 * np.sin(t)
+	num += 2 * np.cos(t) * (-2 * a * np.cos(2 * t) + dlta * np.sin(t) + a * (2 + r **2 + a * np.sin(2 * t)))
+	num += - np.sin(3 * t)
+	den += dlta - dlta * np.cos(2 * t) + np.cos(3 * t)
+	den += - np.cos(t) * (1 + 2 * a **2 - 2 * r **2 + 2 * a **2 * np.cos(2 * t) - 2 * a * (dlta - 4 * np.cos(t))*np.sin(t))
+	newpos = num/den
+	atn = 0
+	atn += a + a * np.cos(2 * t) - dlta * np.sin(t) + np.sin(2 * t)
+	atn /= 1 + dlta * np.cos(t) - np.cos(2 * t) + a * np.sin( 2 * t)
+	new_angle = - np.pi + t + 2 * np.arctan(atn)
 	return (newpos, new_angle)
 def r9_update(position, angle):
-	newpos = 0
-	new_angle = 0
-	return (newpos, new_angle)
+	newpos, new_angle = r8_update(-position, -angle)
+	return (-newpos, -new_angle)
 
 def r1_inverse(position, angle):
 	oldpos = 0
@@ -277,38 +299,55 @@ def r5_jacobian(position, angle):
 	den += np.cos(3 * t)
 	return abs(num / den)
 def r6_jacobian(position, angle):
-	return 1
 	a = position
 	t = angle
-	print a, t
+	#print a, t
 	r = 0.3333
 	dlta = delta(position, angle)
 	dlta = delta(position, angle)
+	"""
 	if dlta == 0:
 		print "r6jdlta < 0"
 		return 1
+	"""
 	num = 0
 	num += a * dlta + 2 * a * np.cos(t) + a * dlta * np.cos(2 * t)
 	num += - 2 * a * np.cos(3 * t) + (3 + a **2 - 2 * r **2) * np.sin(t)
 	num += dlta * np.sin(2 * t) + (-1 + a **2) * np.sin(3 * t)
 	num *= 2 * r **2 * np.cos(t)
 	den = 0
-	den += 4 * (-1 + a **4) - 4 * (-1 + a **2) * r **2 - 2 * r **4 + 2 * dlta * (-1 -3 * a **2 - r **2) * np.cos(t)
+	den += 4 * (-1 + a **4) - 4 * (-1 + a **2) * r **2 - 2 * r **4 + 2 * dlta * (-1 -3 * a **2 + r **2) * np.cos(t)
 	den += (7 + 6 * a **2 + 7 * a **4 - 8 * (1 + a **2) * r **2 + 2 * r **4) * np.cos(2 * t)
 	den += dlta * (3 + 3 * a **2 - 2 * r **2) * np.cos(3 * t)
 	den += 4 * (-1 + a **2) * (1 + a **2 - r **2) * np.cos(4 * t) + (-1 + 3 * a **2) * dlta * np.cos(5 * t)
 	den += (1 - 6 * a **2 + a **4) * np.cos(6 * t) - 2 * a * dlta * (3 + a **2 - r **2) * np.sin(t)
 	den += 4 * a * (-1 + a **2) * np.sin(2 * t) + a * dlta * (-3 - 3 * a **2 + 2 * r **2) * np.sin(3 * t)
-	den += 8 * a * (1 + a **2 - r **2) * np.sin(4 * t) - a * (-3 - a **2) * dlta * np.sin(5 * t) + 4 * a * (-1 + a **2) * np.sin(6 * t)
-	print abs(num/den)
+	den += 8 * a * (1 + a **2 - r **2) * np.sin(4 * t) - a * (-3 + a **2) * dlta * np.sin(5 * t) + 4 * a * (-1 + a **2) * np.sin(6 * t)
+	#print "num, den, abs(num/den)", num, den, abs(num/den)
 	return abs(num / den)
 def r7_jacobian(position, angle):
 	#print "doing r7"
 	return r6_jacobian(-position, -angle)
 def r8_jacobian(position, angle):
-	return 1
+	r = 1 / 3.0
+	a = position
+	t = angle
+	dlta = delta(position, angle)
+	num = 0
+	den = 0
+	num += - np.cos(3 * t) - 2 * dlta * np.sin(t) * (a * np.cos(t) + np.sin(t))
+	num += np.cos(t) * (1 + 2 * a **2 - 2 * r **2 + 2 * a **2 * np.cos(2 * t) + 4 * a * np.sin(2 * t))
+	num *= 2 * r **2 * np.cos(t)
+	den += 4 * (-1 + a **4) - 4 * (-1 + a **2) * r **2 + 2 * r **4 + 2 * dlta * (-1 -3 * a **2 + r **2) * np.cos(t)
+	den += (7 + 6 * a **2 + 7 * a **4 - 8 * (1 + a **2) * r **2 + 2 * r **4) * np.cos(2 * t)
+	den += dlta * (3 + 3 * a **2 - 2 * r **2) * np.cos(3 * t)
+	den += 4 * (-1 + a **2) * (1 + a **2 - r **2) * np.cos(4 * t) + (-1 + 3 * a **2) * dlta * np.cos(5 * t)
+	den += (1 - 6 * a **2 + a **4) * np.cos(6 * t) - 2 * a * dlta * (3 + a **2 - r **2) * np.sin(t)
+	den += 4 * a * (-1 + a **2) * np.sin(2 * t) + a * dlta * (-3 - 3 * a **2 + 2 * r **2) * np.sin(3 * t)
+	den += 8 * a * (1 + a **2 - r **2) * np.sin(4 * t) - a * (-3 + a **2) * dlta * np.sin(5 * t) + 4 * a * (-1 + a **2) * np.sin(6 * t)
+	return abs(num/den)
 def r9_jacobian(position, angle):
-	return 1
+	return r8_jacobian(-position, -angle)
 
 # Following dictionaries should be a better format for fast lookup:
 minmaxes = {

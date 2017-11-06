@@ -20,7 +20,7 @@ either side?
 See definitons.py to view and edit the function boundaries, updates, etc.
 """
 
-scale = 200
+scale = 1000
 
 def showfig(to_show, name='colorMap'):
 	fig = plt.figure(figsize=(6, 3))
@@ -63,8 +63,13 @@ def ang_from_loc(loc):
 	raise ValueError("Index out of bounds on call of pos_from_loc")
 
 
-case_lookup = np.empty(shape=(scale, scale), dtype=np.int)
+case_lookup = np.empty(shape=(scale, scale), dtype=np.uint8)
 case_lookup.fill(-1)
+
+inva_lookup = np.empty(shape=(scale, scale))
+inva_lookup.fill(-2)
+invt_lookup = np.empty(shape=(scale, scale))
+invt_lookup.fill(-2)
 
 # case_lookup is a lookup table for which case a value is in.
 # 'x' axis is position and 'y' axis is angle
@@ -74,6 +79,10 @@ st = time.time()
 if len(sys.argv) == 2 and sys.argv[1] == '-l':
 	print "Loading lookup table from file..."
 	case_lookup = np.load("case_lookup.sn")
+	"""
+	inva_lookup = np.load("inva_lookup.sn")
+	invt_lookup = np.load("invt_lookup.sn")
+	"""
 else:
 	print "Loading lookup table from scratch..."
 
@@ -85,15 +94,39 @@ else:
 					#print "nifty"
 					case_lookup[pos, ang] = i
 					break
+		print('.'.rjust((60 * pos) / scale))
+		sys.stdout.write("\033[F")
 	case_lookup.dump("case_lookup.sn")
+	print "case_lookup done."
+	"""
+	print "Loading inverses from scratch..."
+	for pos in range(scale):
+		for ang in range(scale):
+			casenum = case_lookup[pos, -ang]
+			if casenum != -1:
+				loc = (loc_from_pos(pos), loc_from_ang(ang))
+				invrs = updates[casenum](loc[0], - loc[1])
+				invrs = (invrs[0], -invrs[1])
+				inva_lookup[pos, ang] = invrs[0]
+				invt_lookup[pos, ang] = invrs[1]
+	print "inva_lookup and invt_lookup done."
+	inva_lookup.dump("inva_lookup.sn")
+	invt_lookup.dump("invt_lookup.sn")
+	"""
 
-print "Done in", time.time() - st, "s."
+
+print "Done after", time.time() - st, "s."
 print "Running..."
 
 #print case_lookup
 #print 7 in case_lookup
 
 def rho(pos, ang):
+	cntr = (0, 0)
+	rad = 0.1
+	if (pos - cntr[0])**2 + (ang - cntr[1])**2 <= rad **2:
+		return 1
+	return 0
 	return pos
 	return np.sin(5 * pos) + np.cos(6 * ang)
 
@@ -106,16 +139,19 @@ class Distribution():
 		else:
 			self.steps_from_start = steps_from_start
 		if not current_state:
-			self.current_state = np.array([[rho(loc_from_pos(x), loc_from_ang(y)) for x in range(scale)] for y in range(scale)])
+			self.current_state = np.array([[rho(loc_from_pos(y), loc_from_ang(x)) for x in range(scale)] for y in range(scale)])
 		else:
 			self.current_state = current_state
 		# ^^ start distribution
 
 	def update(self):
+		st = time.time()
 		new_distribution = np.zeros(shape=(scale, scale))
 
 		for pos in range(scale):
 			for ang in range(scale):
+				casenum = case_lookup[pos, -ang]
+
 				# In this situation, casenum is not the case number for the location in statespace we are calculating
 				# rho for. Instead, it is the case numebr to be used for propagating back to the previous location,
 				# namely, same position but negated angle.
@@ -138,8 +174,13 @@ class Distribution():
 						new_distribution[pos, ang] = self.current_state[refang, refpos] / abs(jacobians[backcase](*invrs))
 					# check order of invrs[1] and 0 in the reference to current state. Right now we think current state
 					# should be indexed by currentstate[angle, position]. Should be easy enough to check on.
+			print('.'.rjust((60 * pos) / scale))
+			sys.stdout.write("\033[F")
+
 		self.steps_from_start += 1
 		self.current_state = new_distribution
+		print "Done updating after", time.time() - st, "s"
+		
 
 dist = Distribution(rho)
 

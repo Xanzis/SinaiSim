@@ -76,7 +76,7 @@ invt_lookup.fill(-2)
 
 st = time.time()
 
-if len(sys.argv) == 2 and sys.argv[1] == '-l':
+if '-l' in sys.argv:
 	print "Loading lookup table from file..."
 	case_lookup = np.load("case_lookup.sn")
 	"""
@@ -85,7 +85,7 @@ if len(sys.argv) == 2 and sys.argv[1] == '-l':
 	"""
 else:
 	print "Loading lookup table from scratch..."
-
+	print('|'.rjust(60))
 	for pos in range(scale):
 		for ang in range(scale):
 			for i in range(len(minmaxes)): #i shifted keys in dictionary to make this nicer. maybe we should shift names of regions too?
@@ -114,7 +114,6 @@ else:
 	invt_lookup.dump("invt_lookup.sn")
 	"""
 
-
 print "Done after", time.time() - st, "s."
 print "Running..."
 
@@ -122,13 +121,8 @@ print "Running..."
 #print 7 in case_lookup
 
 def rho(pos, ang):
-	cntr = (0, 0)
-	rad = 0.1
-	if (pos - cntr[0])**2 + (ang - cntr[1])**2 <= rad **2:
-		return 1
-	return 0
-	return pos
-	return np.sin(5 * pos) + np.cos(6 * ang)
+	off = np.sqrt(pos **2 + ang **2)
+	return np.cos(3 * off) / (1 + off **2)
 
 class Distribution():
 
@@ -138,7 +132,7 @@ class Distribution():
 			self.steps_from_start = 0
 		else:
 			self.steps_from_start = steps_from_start
-		if not current_state:
+		if current_state is None:
 			self.current_state = np.array([[rho(loc_from_pos(y), loc_from_ang(x)) for x in range(scale)] for y in range(scale)])
 		else:
 			self.current_state = current_state
@@ -147,6 +141,7 @@ class Distribution():
 	def update(self):
 		st = time.time()
 		new_distribution = np.zeros(shape=(scale, scale))
+		print('|'.rjust(60))
 
 		for pos in range(scale):
 			for ang in range(scale):
@@ -181,8 +176,16 @@ class Distribution():
 		self.current_state = new_distribution
 		print "Done updating after", time.time() - st, "s"
 		
-
-dist = Distribution(rho)
+statefile = None
+if len(sys.argv) - ('-l' in sys.argv) == 2:
+	statefile = sys.argv[2]
+	try:
+		dist = Distribution(rho, current_state=np.load(statefile))
+	except IOError:
+		print "No file found under that name. Will create file and dump data after iterating."
+		dist = Distribution(rho)
+else:
+	dist = Distribution(rho)
 
 
 # That should do it. probably best to represent this with pyplot
@@ -197,7 +200,10 @@ doupdate = 1
 showfig(dist.current_state)
 
 while doupdate:
+	print "Area (ish):", np.sum(dist.current_state)
 	dist.update()
+	if statefile:
+		dist.current_state.dump(statefile)
 	showfig(dist.current_state)
 	doupdate = input("Update again? 1/0\n")
 

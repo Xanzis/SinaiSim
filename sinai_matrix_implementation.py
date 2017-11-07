@@ -68,12 +68,32 @@ def ang_from_loc(loc):
 	raise ValueError("Index out of bounds on call of pos_from_loc")
 
 def index_from_case_lookup((pos,ang)):
-	return shape * ang + pos
+	return scale * ang + pos
+
+case_lookup = np.empty(shape=(scale, scale), dtype=np.int)
+case_lookup.fill(-1)
+
+# case_lookup is a lookup table for which case a value is in.
+# 'x' axis is position and 'y' axis is angle
+
+print "Loading lookup table..."
+st = time.time()
+
+for pos in range(scale):
+	for ang in range(scale):
+		for i in range(len(minmaxes)): #i shifted keys in dictionary to make this nicer. maybe we should shift names of regions too?
+			mnmx = minmaxes[i](loc_from_pos(pos))
+			if mnmx[0] <= loc_from_ang(ang) <= mnmx[1]:
+				#print "nifty"
+				case_lookup[pos, ang] = i
+				break
+
+print "Done in", time.time() - st, "s."
 
 print "Loading UpMatrix..."
 st = time.time()
 
-UpMatrix = np.array([shape**2,shape**2])
+UpMatrix = np.array([scale**2,scale**2])
 for pos in range(scale):
 	for ang in range(scale):
 		# In this situation, casenum is not the case number for the location in statespace we are calculating
@@ -95,29 +115,9 @@ for pos in range(scale):
 			# So yeah this is fine. Also backcase is the case that the inverse is in.
 			if refang != None and refpos != None: #@xander when does that happen?
 				backcase = case_lookup[refpos, refang]
-				UpMatrix[index_from_case_lookup(pos, ang)][index_from_case_lookup(backcase)] = 1.0 / jacobians[backcase](*invrs)
+				UpMatrix[index_from_case_lookup((pos, ang))][index_from_case_lookup(backcase)] = 1.0 / jacobians[backcase](*invrs)
 			# check order of invrs[1] and 0 in the reference to current state. Right now we think current state
 			# should be indexed by currentstate[angle, position]. Should be easy enough to check on.
-
-print "Done in", time.time() - st, "s."
-
-case_lookup = np.empty(shape=(scale, scale), dtype=np.int)
-case_lookup.fill(-1)
-
-# case_lookup is a lookup table for which case a value is in.
-# 'x' axis is position and 'y' axis is angle
-
-print "Loading lookup table..."
-st = time.time()
-
-for pos in range(scale):
-	for ang in range(scale):
-		for i in range(len(minmaxes)): #i shifted keys in dictionary to make this nicer. maybe we should shift names of regions too?
-			mnmx = minmaxes[i](loc_from_pos(pos))
-			if mnmx[0] <= loc_from_ang(ang) <= mnmx[1]:
-				#print "nifty"
-				case_lookup[pos, ang] = i
-				break
 
 print "Done in", time.time() - st, "s."
 print "Running..."

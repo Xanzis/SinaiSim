@@ -160,7 +160,7 @@ class Distribution():
 					#	print "casenum: ", casenum
 					#	print "loc: ", loc
 					refang = ang_from_loc(invrs[1])
-					refpos = pos_from_loc(invrs[0]) 
+					refpos = pos_from_loc(invrs[0])
 					# Note: this relies on the fact that the inverse is the same as the update for negative theta.
 					# This is useful because it saves having to find out the region the thing came from to get an inverse
 					# So yeah this is fine. Also backcase is the case that the inverse is in.
@@ -175,7 +175,7 @@ class Distribution():
 		self.steps_from_start += 1
 		self.current_state = new_distribution
 		print "Done updating after", time.time() - st, "s"
-		
+
 statefile = None
 if len(sys.argv) - ('-l' in sys.argv) == 2:
 	statefile = sys.argv[2]
@@ -206,4 +206,3 @@ while doupdate:
 		dist.current_state.dump(statefile)
 	showfig(dist.current_state)
 	doupdate = input("Update again? 1/0\n")
-

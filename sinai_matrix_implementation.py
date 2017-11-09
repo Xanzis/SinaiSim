@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 import time
 from definitions import *
 from matplotlib import pyplot as plt
@@ -38,10 +39,10 @@ def showfig(to_show, name='colorMap'):
 	plt.show()
 
 def distribution_to_matrix(distribution):
-	matrix = np.array(size)
-	for i in range(size):
-		matrix[i] = [point for point in distribution[size * i:size * (i + 1)]]
-	return matrix
+	matrix = []
+	for i in range(scale):
+		matrix.append([float(i) for i in distribution[scale * i:scale * (i + 1)]])
+	return np.array(matrix)
 
 def loc_from_pos(pos):
 	return 2 * pos/float(scale) - 1
@@ -76,24 +77,30 @@ case_lookup.fill(-1)
 # case_lookup is a lookup table for which case a value is in.
 # 'x' axis is position and 'y' axis is angle
 
-print "Loading lookup table..."
-st = time.time()
-
-for pos in range(scale):
-	for ang in range(scale):
-		for i in range(len(minmaxes)): #i shifted keys in dictionary to make this nicer. maybe we should shift names of regions too?
-			mnmx = minmaxes[i](loc_from_pos(pos))
-			if mnmx[0] <= loc_from_ang(ang) <= mnmx[1]:
-				#print "nifty"
-				case_lookup[pos, ang] = i
-				break
-
-print "Done in", time.time() - st, "s."
+if '-l' in sys.argv:
+	print "Loading lookup table from file..."
+	case_lookup = np.load("case_lookup.sn")
+else:
+	print "Loading lookup table..."
+	st = time.time()
+	print('|'.rjust(60))
+	for pos in range(scale):
+		for ang in range(scale):
+			for i in range(len(minmaxes)): #i shifted keys in dictionary to make this nicer. maybe we should shift names of regions too?
+				mnmx = minmaxes[i](loc_from_pos(pos))
+				if mnmx[0] <= loc_from_ang(ang) <= mnmx[1]:
+					#print "nifty"
+					case_lookup[pos, ang] = i
+					break
+		print('.'.rjust((60 * pos) / scale))
+		sys.stdout.write("\033[F")
+	case_lookup.dump("case_lookup.sn")
+	print "Done in", time.time() - st, "s."
 
 print "Loading UpMatrix..."
 st = time.time()
-
-UpMatrix = np.array([scale**2,scale**2])
+print('|'.rjust(60))
+UpMatrix = np.zeros([scale**2,scale**2])
 for pos in range(scale):
 	for ang in range(scale):
 		# In this situation, casenum is not the case number for the location in statespace we are calculating
@@ -114,10 +121,15 @@ for pos in range(scale):
 			# This is useful because it saves having to find out the region the thing came from to get an inverse
 			# So yeah this is fine. Also backcase is the case that the inverse is in.
 			if refang != None and refpos != None: #@xander when does that happen?
-				backcase = case_lookup[refpos, refang]
-				UpMatrix[index_from_case_lookup((pos, ang))][index_from_case_lookup(backcase)] = 1.0 / jacobians[backcase](*invrs)
+				backcase = int(case_lookup[refpos, refang])
+				othercase = int(index_from_case_lookup((pos, ang)))
+				new = 1 / float(jacobians[backcase](*invrs))
+				UpMatrix[othercase][index_from_case_lookup((refpos, refang))] = new
 			# check order of invrs[1] and 0 in the reference to current state. Right now we think current state
 			# should be indexed by currentstate[angle, position]. Should be easy enough to check on.
+		print('.'.rjust((60 * pos) / scale))
+		sys.stdout.write("\033[F")
+UpMatrix = np.matrix(UpMatrix)
 
 print "Done in", time.time() - st, "s."
 print "Running..."
@@ -126,7 +138,8 @@ print "Running..."
 #print 7 in case_lookup
 
 def rho(pos, ang):
-	return np.sin(5) + np.cos(6 * ang)
+	off = np.sqrt(pos **2 + ang **2)
+	return np.cos(3 * off) / (1 + off **2)
 
 class Distribution():
 
@@ -137,13 +150,15 @@ class Distribution():
 		else:
 			self.steps_from_start = steps_from_start
 		if not current_state:
-			self.current_state = np.array([[rho(loc_from_pos(x), loc_from_ang(y)) for x in range(scale)] for y in range(scale)]).flatten()
+			self.current_state = np.matrix([[rho(loc_from_pos(x), loc_from_ang(y)) for x in range(scale)] for y in range(scale)]).flatten().transpose()
 		else:
 			self.current_state = current_state
 		# ^^ start distribution
 
 	def update(self):
+		print self.current_state.shape, UpMatrix.shape
 		self.current_state = UpMatrix * self.current_state
+		print self.current_state.shape, 0
 		self.steps_from_start += 1
 
 dist = Distribution(rho)
@@ -158,9 +173,12 @@ for i in range(len(minmaxes)):
 	showfig(fig_rules, name=str(i)+"boundaries")
 """
 doupdate = 1
+print distribution_to_matrix(dist.current_state).shape, 'h'
 showfig(distribution_to_matrix(dist.current_state))
 
 while doupdate:
 	dist.update()
+	# print dist.current_state.shape
+	# print distribution_to_matrix(dist.current_state)[0][0]
 	showfig(distribution_to_matrix(dist.current_state))
 	doupdate = input("Update again? 1/0\n")

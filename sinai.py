@@ -20,7 +20,7 @@ either side?
 See definitons.py to view and edit the function boundaries, updates, etc.
 """
 
-scale = 1000
+scale = 100
 
 def showfig(to_show, name='colorMap'):
 	fig = plt.figure(figsize=(6, 3))
@@ -150,7 +150,6 @@ class Distribution():
 				# In this situation, casenum is not the case number for the location in statespace we are calculating
 				# rho for. Instead, it is the case numebr to be used for propagating back to the previous location,
 				# namely, same position but negated angle.
-				casenum = case_lookup[pos, -ang]
 				loc = (loc_from_pos(pos), loc_from_ang(ang)) # this is still correct location. loc[1] to be negated later.
 				if casenum != -1:
 					invrs = updates[casenum](loc[0], - loc[1])

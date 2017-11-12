@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import sparse
 import sys
 import time
 from definitions import *
@@ -20,7 +21,7 @@ either side?
 See definitons.py to view and edit the function boundaries, updates, etc.
 """
 
-scale = 200
+scale = 1000
 
 def showfig(to_show, name='colorMap'):
 	fig = plt.figure(figsize=(6, 3))
@@ -69,7 +70,7 @@ def ang_from_loc(loc):
 	raise ValueError("Index out of bounds on call of pos_from_loc")
 
 def index_from_case_lookup((pos,ang)):
-	return scale * ang + pos
+	return scale * pos + ang
 
 case_lookup = np.empty(shape=(scale, scale), dtype=np.int)
 case_lookup.fill(-1)
@@ -100,7 +101,8 @@ else:
 print "Loading UpMatrix..."
 st = time.time()
 print('|'.rjust(60))
-UpMatrix = np.zeros([scale**2,scale**2])
+UpMatrix = sparse.eye(scale**2)
+UpMatrix = sparse.lil_matrix(UpMatrix)
 for pos in range(scale):
 	for ang in range(scale):
 		# In this situation, casenum is not the case number for the location in statespace we are calculating
@@ -124,13 +126,20 @@ for pos in range(scale):
 				backcase = int(case_lookup[refpos, refang])
 				othercase = int(index_from_case_lookup((pos, ang)))
 				new = 1 / float(jacobians[backcase](*invrs))
-				UpMatrix[othercase][index_from_case_lookup((refpos, refang))] = new
+				UpMatrix[othercase, othercase] = 0
+				UpMatrix[othercase, index_from_case_lookup((refpos, refang))] = new
+			else:
+				pass
+				##print "broken"
+		else:
+			pass
+			#print "broken"
 			# check order of invrs[1] and 0 in the reference to current state. Right now we think current state
 			# should be indexed by currentstate[angle, position]. Should be easy enough to check on.
 		print('.'.rjust((60 * pos) / scale))
 		sys.stdout.write("\033[F")
-UpMatrix = np.matrix(UpMatrix)
 
+UpMatrix = sparse.csr_matrix(UpMatrix)
 print "Done in", time.time() - st, "s."
 print "Running..."
 
@@ -156,9 +165,7 @@ class Distribution():
 		# ^^ start distribution
 
 	def update(self):
-		print self.current_state.shape, UpMatrix.shape
-		self.current_state = UpMatrix * self.current_state
-		print self.current_state.shape, 0
+		self.current_state = UpMatrix.dot(self.current_state)
 		self.steps_from_start += 1
 
 dist = Distribution(rho)
@@ -173,7 +180,6 @@ for i in range(len(minmaxes)):
 	showfig(fig_rules, name=str(i)+"boundaries")
 """
 doupdate = 1
-print distribution_to_matrix(dist.current_state).shape, 'h'
 showfig(distribution_to_matrix(dist.current_state))
 
 while doupdate:

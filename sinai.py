@@ -121,6 +121,8 @@ print "Running..."
 #print 7 in case_lookup
 
 def rho(pos, ang):
+	return 1
+	return (pos + 1) * (ang + np.pi / 2) / np.pi **2
 	off = np.sqrt(pos **2 + ang **2)
 	return np.cos(3 * off) / (1 + off **2)
 
@@ -143,14 +145,17 @@ class Distribution():
 		new_distribution = np.zeros(shape=(scale, scale))
 		print('|'.rjust(60))
 
+
 		for pos in range(scale):
 			for ang in range(scale):
 				casenum = case_lookup[pos, -ang]
-
+				check = False
 				# In this situation, casenum is not the case number for the location in statespace we are calculating
 				# rho for. Instead, it is the case numebr to be used for propagating back to the previous location,
 				# namely, same position but negated angle.
 				casenum = case_lookup[pos, -ang]
+				if casenum in [7, 8]:
+					check = True
 				loc = (loc_from_pos(pos), loc_from_ang(ang)) # this is still correct location. loc[1] to be negated later.
 				if casenum != -1:
 					invrs = updates[casenum](loc[0], - loc[1])
@@ -166,7 +171,17 @@ class Distribution():
 					# So yeah this is fine. Also backcase is the case that the inverse is in.
 					if refang != None and refpos != None:
 						backcase = case_lookup[refpos, refang]
-						new_distribution[pos, ang] = self.current_state[refang, refpos] / abs(jacobians[backcase](*invrs))
+						new_val = self.current_state[refang, refpos] / abs(jacobians[backcase](*invrs))
+						if casenum in [7, 8] and new_val == 0:
+							print "writing 0 for a region related to r8/r9"
+							print "refang, refpos:", refang, refpos
+							print "backcase:", backcase
+							print "jacobian of backcase", abs(jacobians[backcase](*invrs))
+							print "state at inverse:", self.current_state[refpos, refang]
+						new_distribution[pos, ang] = new_val
+					#else:
+					#	print casenum, invrs, loc[0], -loc[1]
+					#if check and new_distribution[]
 					# check order of invrs[1] and 0 in the reference to current state. Right now we think current state
 					# should be indexed by currentstate[angle, position]. Should be easy enough to check on.
 			print('.'.rjust((60 * pos) / scale))
@@ -190,15 +205,15 @@ else:
 
 # That should do it. probably best to represent this with pyplot
 
-showfig(case_lookup)
 """
 for i in range(len(minmaxes)):
 	fig_rules = 5 * (case_lookup == i)
 	showfig(fig_rules, name=str(i)+"boundaries")
 """
 doupdate = 1
-showfig(dist.current_state)
 
+showfig(case_lookup)
+showfig(dist.current_state)
 while doupdate:
 	print "Area (ish):", np.sum(dist.current_state)
 	dist.update()
@@ -206,3 +221,11 @@ while doupdate:
 		dist.current_state.dump(statefile)
 	showfig(dist.current_state)
 	doupdate = input("Update again? 1/0\n")
+
+"""
+for round in range(20):
+	print "Round", round
+	dist.update()
+	if statefile:
+		dist.current_state.dump(statefile)
+"""

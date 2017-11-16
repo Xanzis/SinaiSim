@@ -11,7 +11,7 @@ def delta(position, angle):
 	r = 0.3333
 	a = position
 	t = angle
-	thingy = -1 - a **2 + 2 * r **2 
+	thingy = -1 - a **2 + 2 * r **2
 	thingy += - (-1 + a **2)*np.cos(2 * t)
 	thingy += - 2 * a * np.sin(2 * t)
 	thingy *= 2
@@ -97,7 +97,7 @@ def r9_minmax_angle(position):
 
 def r1_update(position, angle):
 	newpos = (1 - position) * np.tan(np.pi / 2 - angle) - 1
-	new_angle = - np.pi / 2 + angle
+	new_angle = np.pi / 2 - angle
 	return (newpos, new_angle)
 def r2_update(position, angle):
 	#newpos = 1 - (1 + position) * np.tan(np.pi / 2 - angle)
@@ -143,13 +143,13 @@ def r5_update(position, angle):
 	den += - (-1 + a **2) * np.cos(3 * t)
 	den += 2 * np.sin(t) * thing
 	"""
-	position = 
-	(a delta - 2 a (-1 + r^2) Cos[theta] + a delta Cos[2 theta] - 
-   2 a Cos[3 theta] + 3 Sin[theta] + a^2 Sin[theta] - 
-    4 r^2 Sin[theta] + delta Sin[2 theta] - Sin[3 theta] + 
+	position =
+	(a delta - 2 a (-1 + r^2) Cos[theta] + a delta Cos[2 theta] -
+   2 a Cos[3 theta] + 3 Sin[theta] + a^2 Sin[theta] -
+    4 r^2 Sin[theta] + delta Sin[2 theta] - Sin[3 theta] +
     a^2 Sin[3 theta])/((-1 - 3 a^2 + 2 r^2) Cos[
-      theta] - (-1 + a^2) Cos[3 theta] + 
-    2 Sin[theta] (-2 a + a delta Cos[theta] - 2 a Cos[2 theta] + 
+      theta] - (-1 + a^2) Cos[3 theta] +
+    2 Sin[theta] (-2 a + a delta Cos[theta] - 2 a Cos[2 theta] +
        delta Sin[theta]))
 	"""
 	newpos = num/den
@@ -185,20 +185,20 @@ def r6_update(position, angle):
 	den += 3 * np.sin(t) + a**2 * np.sin(t) - 2 * r **2 * np.sin(t)
 	den += dlta * np.sin(2 * t) - np.sin(3 * t) + a **2 * np.sin(3 * t)
 	"""
-	position = 
+	position =
 	((-1 - 3 a^2 + 2 r^2 + 2 a r^2) Cos[theta] - (-1 + a^2) Cos[
-      3 theta] + 
+      3 theta] +
     2 Sin[theta] (-2 a + r^2 + a delta Cos[theta] - 2 a Cos[2 theta] +
-        delta Sin[theta]))/(a delta + 2 a Cos[theta] + 
-    a delta Cos[2 theta] - 2 a Cos[3 theta] + 3 Sin[theta] + 
-    a^2 Sin[theta] - 2 r^2 Sin[theta] + delta Sin[2 theta] - 
+        delta Sin[theta]))/(a delta + 2 a Cos[theta] +
+    a delta Cos[2 theta] - 2 a Cos[3 theta] + 3 Sin[theta] +
+    a^2 Sin[theta] - 2 r^2 Sin[theta] + delta Sin[2 theta] -
     Sin[3 theta] + a^2 Sin[3 theta])
 	"""
 	atn = 0
 	atn += a + a * np.cos(2 * t) - dlta * np.sin(t) + np.sin(2 * t)
 	atn /= 1 + dlta * np.cos(t) - np.cos(2 * t) + a * np.sin( 2 * t)
 	"""
-	1/2 (\[Pi] - 2 theta - 
+	1/2 (\[Pi] - 2 theta -
     4 ArcTan[(a + a Cos[2 theta] - delta Sin[theta] + Sin[2 theta])/(
       1 + delta Cos[theta] - Cos[2 theta] + a Sin[2 theta])])
 	"""
@@ -234,43 +234,6 @@ def r8_update(position, angle):
 def r9_update(position, angle):
 	newpos, new_angle = r8_update(-position, -angle)
 	return (-newpos, -new_angle)
-
-def r1_inverse(position, angle):
-	oldpos = 0
-	oldangle = 0
-	return (oldpos, oldangle)
-def r2_inverse(position, angle):
-	oldpos = 0
-	oldangle = 0
-	return (oldpos, oldangle)
-def r3_inverse(position, angle):
-	oldpos = - position - 2 * np.tan(- angle)
-	oldangle = - angle
-	return (oldpos, oldangle)
-def r4_inverse(position, angle):
-	oldpos = - position - 2 * np.tan(- angle)
-	oldangle = - angle
-	return (oldpos, oldangle)
-def r5_inverse(position, angle):
-	oldpos = 0
-	oldangle = 0
-	return (oldpos, oldangle)
-def r6_inverse(position, angle):
-	oldpos = 0
-	oldangle = 0
-	return (oldpos, oldangle)
-def r7_inverse(position, angle):
-	oldpos = 0
-	oldangle = 0
-	return (oldpos, oldangle)
-def r8_inverse(position, angle):
-	oldpos = 0
-	oldangle = 0
-	return (oldpos, oldangle)
-def r9_inverse(position, angle):
-	oldpos = 0
-	oldangle = 0
-	return (oldpos, oldangle)
 
 # note: by jacobian, I actually mean determinant of the jacobian
 
@@ -371,17 +334,6 @@ updates = {
 	6: r7_update,
 	7: r8_update,
 	8: r9_update
-}
-inverses = {
-	0: r1_inverse,
-	1: r2_inverse,
-	2: r3_inverse,
-	3: r4_inverse,
-	4: r5_inverse,
-	5: r6_inverse,
-	6: r7_inverse,
-	7: r8_inverse,
-	8: r9_inverse
 }
 
 jacobians = {

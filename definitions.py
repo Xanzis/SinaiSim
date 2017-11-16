@@ -97,7 +97,7 @@ def r9_minmax_angle(position):
 
 def r1_update(position, angle):
 	newpos = (1 - position) * np.tan(np.pi / 2 - angle) - 1
-	new_angle = - np.pi / 2 + angle
+	new_angle = np.pi / 2 - angle
 	return (newpos, new_angle)
 def r2_update(position, angle):
 	#newpos = 1 - (1 + position) * np.tan(np.pi / 2 - angle)
@@ -177,7 +177,7 @@ def r6_update(position, angle):
 	num = 0
 	den = 0
 	r = 1 / 3.0
-	num += (-1 - 3 * a **2 + 2 * a * r **2) * np.cos(t)
+	num += (-1 - 3 * a **2 + 2 * a * r **2 + 2 * r **2) * np.cos(t)
 	num += - (-1 + a **2) * np.cos(3 * t)
 	num += 2 * np.sin(t) * (- 2 * a + r **2 + a * dlta * np.cos(t) - 2 * a * np.cos(2 * t) + dlta * np.sin(t))
 	den += a * dlta + 2 * a * np.cos(t)
@@ -202,7 +202,7 @@ def r6_update(position, angle):
     4 ArcTan[(a + a Cos[2 theta] - delta Sin[theta] + Sin[2 theta])/(
       1 + delta Cos[theta] - Cos[2 theta] + a Sin[2 theta])])
 	"""
-	newpos = num / den
+	newpos = - num / den
 	new_angle = 0.5 * (np.pi - 2 * t - 4 * np.arctan(atn))
 	return (newpos, new_angle)
 def r7_update(position, angle):

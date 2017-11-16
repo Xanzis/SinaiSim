@@ -20,7 +20,7 @@ either side?
 See definitons.py to view and edit the function boundaries, updates, etc.
 """
 
-scale = 1000
+scale = 100
 
 def showfig(to_show, name='colorMap'):
 	fig = plt.figure(figsize=(6, 3))

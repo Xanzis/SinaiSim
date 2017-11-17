@@ -204,7 +204,7 @@ def r6_update(position, angle):
 	"""
 	newpos = - num / den
 	new_angle = 0.5 * (np.pi - 2 * t - 4 * np.arctan(atn))
-	return (newpos, new_angle)
+	return (newpos, -new_angle)
 def r7_update(position, angle):
 	position *= -1
 	angle *= -1
@@ -230,6 +230,7 @@ def r8_update(position, angle):
 	atn += a + a * np.cos(2 * t) - dlta * np.sin(t) + np.sin(2 * t)
 	atn /= 1 + dlta * np.cos(t) - np.cos(2 * t) + a * np.sin( 2 * t)
 	new_angle = - np.pi + t + 2 * np.arctan(atn)
+	new_angle = (new_angle+np.pi)%(2 * np.pi)-np.pi
 	return (newpos, new_angle)
 def r9_update(position, angle):
 	newpos, new_angle = r8_update(-position, -angle)

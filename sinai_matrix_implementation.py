@@ -22,7 +22,7 @@ either side?
 See definitons.py to view and edit the function boundaries, updates, etc.
 """
 
-SCALE = 100
+SCALE = 1000
 
 def showfig(to_show, name='colorMap'):
 	fig = plt.figure(figsize=(6, 3))
@@ -163,7 +163,15 @@ class Distribution():
 		self.current_state = PFMATRIX.dot(self.current_state)
 		self.steps_from_start += 1
 
-	def convert_to_matrix(self):
+	def limit(self, iterations = 1000):
+		for i in range(iterations):
+			self.update()
+
+	def display(self):
+		showfig(self.__convert_to_matrix())
+
+
+	def __convert_to_matrix(self):
 		matrix = []
 		for i in range(SCALE):
 			matrix.append([float(i) for i in self.current_state[SCALE * i:SCALE * (i + 1)]])
@@ -181,9 +189,9 @@ for i in range(len(minmaxes)):
 	showfig(fig_rules, name=str(i)+"boundaries")
 """
 doupdate = 1
-showfig(dist.convert_to_matrix())
+dist.display()
 
 while doupdate:
 	dist.update()
-	showfig(dist.convert_to_matrix())
+	dist.display()
 	doupdate = input("Update again? 1/0\n")

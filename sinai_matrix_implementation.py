@@ -1,4 +1,5 @@
 import numpy as np
+import scipy
 from scipy import sparse
 import scipy.sparse.linalg as linalg
 import sys
@@ -6,7 +7,6 @@ import time
 from definitions import *
 from matplotlib import pyplot as plt
 import random
-# This imports all globals and functions from definitions. I jsut did this to save space
 
 """
 Case definition:
@@ -23,7 +23,7 @@ either side?
 See definitons.py to view and edit the function boundaries, updates, etc.
 """
 
-SCALE = 500
+SCALE = 100
 
 def showfig(to_show, name='colorMap'):
 	fig = plt.figure(figsize=(6, 3))
@@ -68,9 +68,6 @@ def ang_from_loc(loc):
 def index_from_CASE_LOOKUP((pos,ang)):
 	return SCALE * pos + ang
 
-CASE_LOOKUP = np.empty(shape=(SCALE, SCALE), dtype=np.int)
-CASE_LOOKUP.fill(-1)
-
 # CASE_LOOKUP is a lookup table for which case a value is in.
 # 'x' axis is position and 'y' axis is angle
 
@@ -79,11 +76,13 @@ if '-l' in sys.argv:
 	PFMATRIX = sparse.load_npz("PFMATRIX.npz")
 else:
 	print "Loading lookup table..."
+	CASE_LOOKUP = np.empty(shape=(SCALE, SCALE), dtype=np.int)
+	CASE_LOOKUP.fill(-1)
 	st = time.time()
 	print('|'.rjust(60))
 	for pos in range(SCALE):
 		for ang in range(SCALE):
-			for i in range(len(minmaxes)): #i shifted keys in dictionary to make this nicer. maybe we should shift names of regions too?
+			for i in range(len(minmaxes)): # @xander i shifted keys in dictionary to make this nicer. maybe we should shift names of regions too?
 				mnmx = minmaxes[i](loc_from_pos(pos))
 				if mnmx[0] <= loc_from_ang(ang) <= mnmx[1]:
 					#print "nifty"
@@ -120,7 +119,7 @@ else:
 				if refang != None and refpos != None: #@xander when does that happen?
 					backcase = int(CASE_LOOKUP[refpos, refang])
 					othercase = int(index_from_CASE_LOOKUP((pos, ang)))
-					new = 1 / float(jacobians[backcase](*invrs))
+					new = min(1 / float(jacobians[backcase](*invrs)), 5)
 					PFMATRIX[othercase, othercase] = 0
 					PFMATRIX[othercase, index_from_CASE_LOOKUP((refpos, refang))] = new
 				else:
@@ -129,8 +128,7 @@ else:
 			else:
 				pass
 				#print "broken"
-				# check order of invrs[1] and 0 in the reference to current state. Right now we think current state
-				# should be indexed by currentstate[angle, position]. Should be easy enough to check on.
+
 			print('.'.rjust((60 * pos) / SCALE))
 			sys.stdout.write("\033[F")
 
@@ -139,7 +137,8 @@ else:
 	print "Done in", time.time() - st, "s."
 	print "Running..."
 
-def rho(pos, ang):
+def rho(ang, pos):
+	#return 0.00222 * np.exp(4.39786 + 0.0321558 * ang + 0.135135 * ang ** 2) * (np.pi/2 - ang) * (np.pi/2 + ang)
 	return 1.1 - random.random() / float(5)
 	#return (pos + 1) * (ang + np.pi / 2) / np.pi **2
 	# off = np.sqrt(pos **2 + ang **2)
@@ -159,25 +158,20 @@ class Distribution():
 		except:
 			self.current_state = np.matrix([[rho(loc_from_pos(x), loc_from_ang(y)) for x in range(SCALE)] for y in range(SCALE)]).flatten().transpose()
 
+	@staticmethod
+	def delta(dist1, dist2):
+		try:
+			delta = np.array((dist1.current_state - dist2.current_state))**2
+		except:
+			try:
+				delta = np.array((dist1 - dist2.current_state))**2
+			except:
+				try:
+					delta = np.array((dist1.current_state - dist2))**2
+				except:
+					delta = np.array((dist1 - dist2))**2
 
-	def update(self, show_integral = True):
-		self.current_state = PFMATRIX.dot(self.current_state)
-		if show_integral:
-			print self.integral()
-		self.steps_from_start += 1
-
-	def limit(self, iterations = 1000, integrate = False):
-		for i in range(iterations):
-			self.update(show_integral = integrate)
-
-	def display(self):
-		showfig(self.__convert_to_matrix())
-
-	def __convert_to_matrix(self):
-		matrix = []
-		for i in range(SCALE):
-			matrix.append([float(i) for i in self.current_state[SCALE * i:SCALE * (i + 1)]])
-		return np.array(matrix)
+		return delta.sum()
 
 	def integral(self):
 		integral = 0
@@ -188,6 +182,50 @@ class Distribution():
 			for i in self.current_state:
 				integral += i / float(SCALE**2)
 		return integral
+
+	def update(self, normalize = True, show_integral = True, calc_change = False):
+		i = 1
+		if normalize or show_integral:
+			integral = self.integral()
+			if normalize:
+				i = integral
+			if show_integral:
+				print integral
+		if calc_change:
+			new_state = PFMATRIX.dot(self.current_state) / float(i)
+			delta = Distribution.delta(self, new_state)
+			self.current_state = new_state
+			self.steps_from_start += 1
+			return delta
+		else:
+			self.current_state = PFMATRIX.dot(self.current_state) / float(i)
+			self.steps_from_start += 1
+
+	def limit(self, iterations = 1000, track_change = False):
+		if not track_change:
+			for i in range(iterations):
+				if i == 50 or i == 150 or i == 300 or i == 500 or i%2000 == 1999 or i == iterations - 1:
+					self.update()
+				else:
+					self.update(show_integral = False, normalize = False)
+
+		else:
+			deltas = []
+			for i in range(iterations):
+				if i == 50 or i == 150 or i == 300 or i == 500 or i%2000 == 1999 or i == iterations - 1:
+					self.update()
+				else:
+					deltas.append(self.update(show_integral = False, normalize = False, calc_change = True))
+			return deltas
+
+	def display(self):
+		showfig(self.__convert_to_matrix())
+
+	def __convert_to_matrix(self):
+		matrix = []
+		for i in range(SCALE):
+			matrix.append([float(i) for i in self.current_state[SCALE * i:SCALE * (i + 1)]])
+		return np.array(matrix)
 
 	def smooth(self, k=0.5):
 		new_state = [i for i in self.current_state]
@@ -217,7 +255,7 @@ class Distribution():
 						weights += k
 					except:
 						pass
-				if i%SCALE != -1:
+				if i%SCALE != SCALE - 1:
 					new_state[i] += k*self.current_state[i + 1]
 					weights += k
 					try:
